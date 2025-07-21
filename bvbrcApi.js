@@ -42,3 +42,7 @@ export function queryGenomeBy(filters, opts = {}) {
   return query('genome', `and(${objToEq(filters)})`, opts);
 }
 
+export function queryGenomeFeatureBy(filters, opts = {}) {
+  return query('genome_feature', `and(${objToEq(filters)})`, opts);
+}
+
