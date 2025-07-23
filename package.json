@@ -28,7 +28,8 @@
   },
   "files": [
     "bvbrcApi.js",
-    "bvbrcApi.mjs"
+    "bvbrcApi.mjs",
+    "bvbrcApiCore.js"
   ]
 }
 
