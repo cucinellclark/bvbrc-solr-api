@@ -3,33 +3,46 @@
   "version": "0.1.4",
   "description": "Tiny ES‑module client for BV‑BRC Solr endpoints",
   "type": "module",
-  "main": "./bvbrcApi.js",
-  "module": "./bvbrcApi.mjs",
+  "main": "./dist/bvbrcApi.js",
+  "module": "./dist/bvbrcApi.mjs",
   "exports": {
     ".": {
-      "import": "./bvbrcApi.mjs",
-      "require": "./bvbrcApi.js",
-      "default": "./bvbrcApi.js"
+      "import": "./dist/bvbrcApi.mjs",
+      "require": "./dist/bvbrcApi.js",
+      "default": "./dist/bvbrcApi.js"
     },
     "./bvbrcApi": {
-      "import": "./bvbrcApi.mjs",
-      "require": "./bvbrcApi.js",
-      "default": "./bvbrcApi.js"
+      "import": "./dist/bvbrcApi.mjs",
+      "require": "./dist/bvbrcApi.js",
+      "default": "./dist/bvbrcApi.js"
     }
   },
   "scripts": {
+    "build": "rollup -c",
+    "build:api": "rollup -c",
+    "prepublishOnly": "npm run build",
     "test": "echo \"No tests yet\" && exit 0"
   },
-  "keywords": ["bvbrc", "solr", "genomics", "api"],
+  "keywords": [
+    "bvbrc",
+    "solr",
+    "genomics",
+    "api"
+  ],
   "author": "Your Name <you@example.com>",
   "license": "MIT",
   "engines": {
     "node": ">=18"
   },
   "files": [
-    "bvbrcApi.js",
-    "bvbrcApi.mjs",
-    "bvbrcApiCore.js"
-  ]
+    "dist/",
+    "src/",
+    "rollup.config.js"
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.28.0",
+    "@babel/plugin-transform-modules-amd": "^7.27.1",
+    "@rollup/plugin-babel": "^6.0.4",
+    "rollup": "^4.45.1"
+  }
 }
-
