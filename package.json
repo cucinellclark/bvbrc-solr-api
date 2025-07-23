@@ -1,25 +1,30 @@
 {
-  "name": "bvbrc-solr-api",         
+  "name": "bvbrc-solr-api",
   "version": "0.1.1",
   "description": "Tiny ES‑module client for BV‑BRC Solr endpoints",
-  "type": "module",             
+  "type": "module",
+  "main": "./bvbrcApi.js",
+  "module": "./bvbrcApi.mjs",
   "exports": {
     ".": {
       "import": "./bvbrcApi.mjs",
+      "require": "./bvbrcApi.js",
       "default": "./bvbrcApi.js"
     },
     "./bvbrcApi": {
       "import": "./bvbrcApi.mjs",
+      "require": "./bvbrcApi.js",
       "default": "./bvbrcApi.js"
     }
   },
-  "main": "./bvbrcApi.js",
-  "module": "./bvbrcApi.mjs",
+  "scripts": {
+    "test": "echo \"No tests yet\" && exit 0"
+  },
   "keywords": ["bvbrc", "solr", "genomics", "api"],
   "author": "Your Name <you@example.com>",
   "license": "MIT",
   "engines": {
-    "node": ">=18"              
+    "node": ">=18"
   },
   "files": [
     "bvbrcApi.js",
