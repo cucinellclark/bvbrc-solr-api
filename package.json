@@ -5,6 +5,7 @@
   "type": "module",             
   "exports": {
     ".": "./bvbrcApi.js"        
+    ".": "./bvbrcApi.mjs"        
   },
   "keywords": ["bvbrc", "solr", "genomics", "api"],
   "author": "Your Name <you@example.com>",
@@ -13,7 +14,8 @@
     "node": ">=18"              
   },
   "files": [
-    "bvbrcApi.js"               
+    "bvbrcApi.js",
+    "bvbrcApi.mjs"    
   ]
 }
 
