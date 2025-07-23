@@ -1,6 +1,6 @@
 {
   "name": "bvbrc-solr-api",         
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Tiny ES‑module client for BV‑BRC Solr endpoints",
   "type": "module",             
   "exports": {
