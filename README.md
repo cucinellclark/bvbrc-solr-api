@@ -9,6 +9,8 @@ A lightweight JavaScript client for interacting with [BV-BRC](https://www.bv-brc
 - 🌐 **Universal**: Works in browsers, Node.js, and Dojo environments
 - 📊 **Rich API**: Access genomes, features, and antibiotic data with simple functions
 - 🔍 **Flexible Querying**: Support for filtering, sorting, field selection, and limiting results
+- 📥 **HTTP Download Support**: Enable HTTP download mode for large datasets with automatic sorting
+- ⚡ **Smart Defaults**: Default limit of 1000 results for efficient data retrieval
 
 ## Installation
 
@@ -21,11 +23,28 @@ npm install bvbrc-solr-api
 ### ES Modules (Node.js 18+, Modern Browsers)
 
 ```javascript
-import { getGenome, queryGenomeBy, getGenomeFeature, queryGenomeFeatureBy, getAntibiotic } from 'bvbrc-solr-api';
+import { 
+  getGenome, 
+  queryGenomeBy, 
+  getGenomeFeature, 
+  queryGenomeFeatureBy,
+  getGenomeFeatureByGenomeId,
+  getGenomeFeatureByGene,
+  getGenomeFeatureByProduct,
+  getAntibiotic 
+} from 'bvbrc-solr-api';
 
 // Get a specific genome by ID
 const ecoli = await getGenome('208964.12');
 console.log(ecoli[0].genome_name);
+
+// Get genome features by genome ID
+const features = await getGenomeFeatureByGenomeId('208964.12', { limit: 50 });
+console.log(`Found ${features.length} features`);
+
+// Get features by gene name
+const geneFeatures = await getGenomeFeatureByGene('lacZ', { limit: 10 });
+console.log(geneFeatures.map(f => f.product));
 
 // Query genomes with filters and options
 const ecoliFeatures = await queryGenomeFeatureBy(
@@ -74,15 +93,24 @@ Generic query function for any BV-BRC Solr core.
 - **`core`** (string): The Solr core to query (e.g., 'genome', 'genome_feature', 'antibiotics')
 - **`filter`** (string): Query filter string
 - **`options`** (object): Query options
-  - `limit` (number): Maximum number of results
+  - `limit` (number): Maximum number of results (default: 1000)
   - `select` (array): Fields to include in response
   - `sort` (string): Sort field and direction
+  - `http_download` (boolean): Enable HTTP download mode (default: false). Requires `sort` parameter when true.
 
 ```javascript
 const results = await query('genome', 'eq(genome_id,208964.12)', {
   limit: 10,
   select: ['genome_name', 'organism_name'],
   sort: 'genome_name'
+});
+
+// Example with http_download enabled
+const downloadResults = await query('genome', 'eq(genome_id,208964.12)', {
+  limit: 1000,
+  select: ['genome_name', 'organism_name'],
+  sort: 'genome_name',
+  http_download: true
 });
 ```
 
@@ -151,6 +179,182 @@ const features = await queryGenomeFeatureBy(
 );
 ```
 
+### Genome Feature Convenience Functions
+
+The library provides specialized functions for common genome feature queries:
+
+#### `getGenomeFeatureByGenomeId(genomeId, options)`
+
+Get all features for a specific genome.
+
+```javascript
+const features = await getGenomeFeatureByGenomeId('208964.12', {
+  limit: 100,
+  select: ['feature_id', 'gene', 'product', 'feature_type']
+});
+```
+
+#### `getGenomeFeatureByGene(geneName, options)`
+
+Find features by gene name (case insensitive).
+
+```javascript
+const lacZFeatures = await getGenomeFeatureByGene('lacZ', {
+  limit: 20,
+  select: ['genome_id', 'gene', 'product', 'start', 'end']
+});
+```
+
+#### `getGenomeFeatureByProduct(productName, options)`
+
+Find features by product name (case insensitive).
+
+```javascript
+const betaGalFeatures = await getGenomeFeatureByProduct('beta-galactosidase', {
+  limit: 20,
+  select: ['genome_id', 'gene', 'product', 'feature_type']
+});
+```
+
+#### `getGenomeFeatureByFeatureType(featureType, options)`
+
+Get features by type (e.g., 'CDS', 'tRNA', 'rRNA').
+
+```javascript
+const cdsFeatures = await getGenomeFeatureByFeatureType('CDS', {
+  limit: 50,
+  select: ['feature_id', 'gene', 'product', 'genome_id']
+});
+```
+
+#### `getGenomeFeatureByAnnotation(annotationType, options)`
+
+Get features by annotation type (e.g., 'PATRIC', 'RefSeq').
+
+```javascript
+const patricFeatures = await getGenomeFeatureByAnnotation('PATRIC', {
+  limit: 100,
+  select: ['feature_id', 'gene', 'product', 'genome_id']
+});
+```
+
+#### `getGenomeFeatureByPatricId(patricId, options)`
+
+Find features by PATRIC ID.
+
+```javascript
+const feature = await getGenomeFeatureByPatricId('fig|83333.1.peg.1', {
+  select: ['gene', 'product', 'start', 'end', 'strand']
+});
+```
+
+#### `getGenomeFeatureByProteinId(proteinId, options)`
+
+Find features by protein ID.
+
+```javascript
+const features = await getGenomeFeatureByProteinId('WP_000123456.1', {
+  select: ['feature_id', 'gene', 'product', 'genome_id']
+});
+```
+
+#### `getGenomeFeatureByAccession(accession, options)`
+
+Find features by accession number.
+
+```javascript
+const features = await getGenomeFeatureByAccession('NC_000913.3', {
+  select: ['feature_id', 'gene', 'product', 'feature_type']
+});
+```
+
+#### `getGenomeFeatureByUniprotAccession(uniprotAccession, options)`
+
+Find features by UniProtKB accession.
+
+```javascript
+const features = await getGenomeFeatureByUniprotAccession('P00722', {
+  select: ['feature_id', 'gene', 'product', 'genome_id']
+});
+```
+
+#### `getGenomeFeatureByGoTerm(goTerm, options)`
+
+Find features by GO term (case insensitive).
+
+```javascript
+const features = await getGenomeFeatureByGoTerm('GO:0003674', {
+  limit: 50,
+  select: ['feature_id', 'gene', 'product', 'genome_id']
+});
+```
+
+#### `getGenomeFeatureByStrand(strand, options)`
+
+Get features by strand ('+' or '-').
+
+```javascript
+const positiveStrandFeatures = await getGenomeFeatureByStrand('+', {
+  limit: 100,
+  select: ['feature_id', 'gene', 'product', 'start', 'end']
+});
+```
+
+#### `getGenomeFeatureByLocationRange(start, end, options)`
+
+Get features within a specific location range.
+
+```javascript
+const features = await getGenomeFeatureByLocationRange(1000, 5000, {
+  limit: 50,
+  select: ['feature_id', 'gene', 'product', 'start', 'end']
+});
+```
+
+#### `getGenomeFeatureBySequenceLengthRange(minLength, maxLength, options)`
+
+Get features by DNA sequence length range.
+
+```javascript
+const longGenes = await getGenomeFeatureBySequenceLengthRange(3000, 10000, {
+  limit: 20,
+  select: ['feature_id', 'gene', 'product', 'na_length']
+});
+```
+
+#### `getGenomeFeatureByProteinLengthRange(minLength, maxLength, options)`
+
+Get features by protein length range.
+
+```javascript
+const longProteins = await getGenomeFeatureByProteinLengthRange(1000, 5000, {
+  limit: 20,
+  select: ['feature_id', 'gene', 'product', 'aa_length']
+});
+```
+
+#### `getGenomeFeatureByPublicStatus(isPublic, options)`
+
+Get features by public status.
+
+```javascript
+const publicFeatures = await getGenomeFeatureByPublicStatus(true, {
+  limit: 100,
+  select: ['feature_id', 'gene', 'product', 'genome_id']
+});
+```
+
+#### `getAllGenomeFeatures(options)`
+
+Get all genome features with pagination.
+
+```javascript
+const allFeatures = await getAllGenomeFeatures({
+  limit: 1000,
+  select: ['feature_id', 'gene', 'product', 'genome_id']
+});
+```
+
 ## Development
 
 ### Building
@@ -170,7 +374,14 @@ This generates:
 ```
 bvbrc-solr-api/
 ├── src/
-│   └── bvbrcApiCore.js     # Main source file
+│   ├── index.js            # Public entry point
+│   ├── core/               # Shared infrastructure
+│   │   ├── httpClient.js
+│   │   └── queryBuilder.js
+│   └── resources/          # One module per BV-BRC data type
+│       ├── genome.js
+│       ├── genome_feature.js
+│       └── antibiotics.js
 ├── dist/                   # Built files (generated)
 ├── package.json
 ├── rollup.config.js        # Build configuration
@@ -211,7 +422,11 @@ ecoliGenomes.forEach(genome => {
 ### Analyzing Genome Features
 
 ```javascript
-import { queryGenomeFeatureBy } from 'bvbrc-solr-api';
+import { 
+  queryGenomeFeatureBy, 
+  getGenomeFeatureByGene,
+  getGenomeFeatureByFeatureType 
+} from 'bvbrc-solr-api';
 
 // Get all genes from a specific genome
 const genes = await queryGenomeFeatureBy(
@@ -227,6 +442,79 @@ const genes = await queryGenomeFeatureBy(
 );
 
 console.log(`Found ${genes.length} genes`);
+
+// Find all lacZ genes across genomes
+const lacZGenes = await getGenomeFeatureByGene('lacZ', {
+  limit: 50,
+  select: ['genome_id', 'gene', 'product', 'start', 'end']
+});
+
+console.log(`Found ${lacZGenes.length} lacZ genes`);
+
+// Get all tRNA features
+const tRNAs = await getGenomeFeatureByFeatureType('tRNA', {
+  limit: 100,
+  select: ['feature_id', 'gene', 'genome_id']
+});
+
+console.log(`Found ${tRNAs.length} tRNA features`);
+```
+
+### Advanced Feature Analysis
+
+```javascript
+import { 
+  getGenomeFeatureByLocationRange,
+  getGenomeFeatureByProteinLengthRange,
+  getGenomeFeatureByGoTerm
+} from 'bvbrc-solr-api';
+
+// Find long genes in a specific region
+const longGenes = await getGenomeFeatureByLocationRange(100000, 200000, {
+  limit: 20,
+  select: ['feature_id', 'gene', 'product', 'start', 'end', 'na_length']
+});
+
+// Find large proteins
+const largeProteins = await getGenomeFeatureByProteinLengthRange(500, 1000, {
+  limit: 50,
+  select: ['feature_id', 'gene', 'product', 'aa_length']
+});
+
+// Find features with specific GO terms
+const dnaBindingProteins = await getGenomeFeatureByGoTerm('GO:0003677', {
+  limit: 100,
+  select: ['feature_id', 'gene', 'product', 'genome_id']
+});
+```
+
+### HTTP Download for Large Datasets
+
+```javascript
+import { queryGenomeBy, queryGenomeFeatureBy } from 'bvbrc-solr-api';
+
+// Download all E. coli genomes with HTTP download mode
+const allEcoliGenomes = await queryGenomeBy(
+  { organism_name: 'Escherichia coli' },
+  { 
+    http_download: true,
+    sort: 'genome_id',
+    select: ['genome_id', 'genome_name', 'strain', 'genome_length']
+  }
+);
+
+// Download all features from a specific genome
+const allGenomeFeatures = await queryGenomeFeatureBy(
+  { genome_id: '208964.12' },
+  { 
+    http_download: true,
+    sort: 'start',
+    select: ['feature_id', 'gene', 'product', 'start', 'end']
+  }
+);
+
+console.log(`Downloaded ${allEcoliGenomes.length} genomes`);
+console.log(`Downloaded ${allGenomeFeatures.length} features`);
 ```
 
 ## License

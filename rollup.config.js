@@ -1,7 +1,7 @@
 export default [
   // ESM build - simple copy to dist/
   {
-    input: 'src/bvbrcApiCore.js',
+    input: 'src/index.js',
     output: {
       file: 'dist/bvbrcApi.mjs',
       format: 'esm'
@@ -9,7 +9,7 @@ export default [
   },
   // AMD build for Dojo
   {
-    input: 'src/bvbrcApiCore.js',
+    input: 'src/index.js',
     output: {
       file: 'dist/bvbrcApi.js',
       format: 'amd'

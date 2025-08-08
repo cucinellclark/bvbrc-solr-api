@@ -15,6 +15,11 @@
       "import": "./dist/bvbrcApi.mjs",
       "require": "./dist/bvbrcApi.js",
       "default": "./dist/bvbrcApi.js"
+    },
+    "./index": {
+      "import": "./dist/bvbrcApi.mjs",
+      "require": "./dist/bvbrcApi.js",
+      "default": "./dist/bvbrcApi.js"
     }
   },
   "scripts": {
