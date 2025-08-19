@@ -12,7 +12,8 @@ export default [
     input: 'src/index.js',
     output: {
       file: 'dist/bvbrcApi.js',
-      format: 'amd'
+      format: 'amd',
+      exports: 'named'
     }
   }
 ]; 
