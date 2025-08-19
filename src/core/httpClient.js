@@ -1,5 +1,3 @@
-import { getAuthToken } from './config.js';
-
 const DEFAULT_BASE_URL = 'https://www.bv-brc.org/api';
 const DEFAULT_HEADERS = { 
   Accept: 'application/json',
@@ -9,13 +7,9 @@ const DEFAULT_HEADERS = {
 export function createContext(overrides = {}) {
   const { baseUrl, headers } = overrides;
   
-  // Get auth token from config
-  const authToken = getAuthToken();
-  const authHeaders = authToken ? { Authorization: authToken } : {};
-  
   return {
     baseUrl: baseUrl || DEFAULT_BASE_URL,
-    headers: { ...DEFAULT_HEADERS, ...authHeaders, ...(headers || {}) },
+    headers: { ...DEFAULT_HEADERS, ...(headers || {}) },
   };
 }
 
@@ -40,14 +34,7 @@ export async function run(coreName, filter, options = {}, baseUrl, headers) {
   const url = `${(baseUrl || DEFAULT_BASE_URL).replace(/\/$/, '')}/${coreName}/`;
   const body = params.join('&');
   
-  // Ensure headers include authentication if not provided
   const finalHeaders = headers || DEFAULT_HEADERS;
-  if (!finalHeaders.Authorization) {
-    const authToken = getAuthToken();
-    if (authToken) {
-      finalHeaders.Authorization = authToken;
-    }
-  }
   
   console.log(url);
   console.log(finalHeaders);
