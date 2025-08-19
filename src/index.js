@@ -1,5 +1,6 @@
 // Public entry: client factory + generic query
 import { createContext, run as runInternal } from './core/httpClient.js';
+import { setAuthToken, getAuthToken, setConfig, getConfig } from './core/config.js';
 import { antibiotics as antibioticsResource } from './resources/antibiotics.js';
 import { bioset as biosetResource } from './resources/bioset.js';
 import { bioset_result as biosetResultResource } from './resources/bioset_result.js';
@@ -83,5 +84,10 @@ export async function query(core, filter = '', options = {}) {
 export default {
   createClient,
   query,
+  // Configuration functions
+  setAuthToken,
+  getAuthToken,
+  setConfig,
+  getConfig,
 };
 

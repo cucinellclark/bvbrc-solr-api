@@ -18,6 +18,22 @@ A lightweight JavaScript client for interacting with [BV-BRC](https://www.bv-brc
 npm install bvbrc-solr-api
 ```
 
+## Authentication
+
+The BV-BRC API requires authentication for most operations. See [AUTHENTICATION.md](./AUTHENTICATION.md) for detailed instructions on setting up authentication.
+
+### Quick Setup
+
+```javascript
+import bvbrcApi from 'bvbrc-solr-api';
+
+// Set your authentication token
+bvbrcApi.setAuthToken('your-auth-token-here');
+
+// Create a client
+const client = bvbrcApi.createClient();
+```
+
 ## Usage
 
 ### ES Modules (Node.js 18+, Modern Browsers)

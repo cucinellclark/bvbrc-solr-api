@@ -1,5 +1,47 @@
 define(['exports'], (function (exports) { 'use strict';
 
+  // Runtime configuration system
+  let runtimeConfig = {
+    auth_token: null
+  };
+
+  // Try to load from config.json in development (Node.js environment)
+  function loadConfigFile() {
+    try {
+      // Only try to load from file in Node.js environment
+      if (typeof process !== 'undefined' && process.versions && process.versions.node) {
+        const fs = require('fs');
+        const path = require('path');
+        const configPath = path.join(process.cwd(), 'config.json');
+        const configData = fs.readFileSync(configPath, 'utf8');
+        return JSON.parse(configData);
+      }
+    } catch (error) {
+      // Silently fail in browser or if file doesn't exist
+    }
+    return { auth_token: null };
+  }
+
+  // Initialize with file config if available
+  const fileConfig = loadConfigFile();
+  runtimeConfig.auth_token = fileConfig.auth_token;
+
+  function setAuthToken(token) {
+    runtimeConfig.auth_token = token;
+  }
+
+  function getAuthToken() {
+    return runtimeConfig.auth_token || null;
+  }
+
+  function getConfig() {
+    return { ...runtimeConfig };
+  }
+
+  function setConfig(config) {
+    runtimeConfig = { ...runtimeConfig, ...config };
+  }
+
   const DEFAULT_BASE_URL = 'https://www.bv-brc.org/api';
   const DEFAULT_HEADERS = { 
     Accept: 'application/json',
@@ -8,9 +50,14 @@ define(['exports'], (function (exports) { 'use strict';
 
   function createContext(overrides = {}) {
     const { baseUrl, headers } = overrides;
+    
+    // Get auth token from config
+    const authToken = getAuthToken();
+    const authHeaders = authToken ? { Authorization: authToken } : {};
+    
     return {
       baseUrl: baseUrl || DEFAULT_BASE_URL,
-      headers: { ...DEFAULT_HEADERS, ...(headers || {}) },
+      headers: { ...DEFAULT_HEADERS, ...authHeaders, ...(headers || {}) },
     };
   }
 
@@ -34,12 +81,22 @@ define(['exports'], (function (exports) { 'use strict';
 
     const url = `${(baseUrl || DEFAULT_BASE_URL).replace(/\/$/, '')}/${coreName}/`;
     const body = params.join('&');
+    
+    // Ensure headers include authentication if not provided
+    const finalHeaders = headers || DEFAULT_HEADERS;
+    if (!finalHeaders.Authorization) {
+      const authToken = getAuthToken();
+      if (authToken) {
+        finalHeaders.Authorization = authToken;
+      }
+    }
+    
     console.log(url);
-    console.log(headers);
+    console.log(finalHeaders);
     console.log('Request body:', body);
     const response = await fetch(url, { 
       method: 'POST',
-      headers: headers || DEFAULT_HEADERS,
+      headers: finalHeaders,
       body: body
     });
     if (!response.ok) {
@@ -9540,6 +9597,11 @@ define(['exports'], (function (exports) { 'use strict';
   var index = {
     createClient,
     query,
+    // Configuration functions
+    setAuthToken,
+    getAuthToken,
+    setConfig,
+    getConfig,
   };
 
   exports.createClient = createClient;
